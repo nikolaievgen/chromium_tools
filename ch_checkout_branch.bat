@@ -1,9 +1,9 @@
 @echo off
 rem input variables
 set root_name=chrome
-set tag=50.0.2661.37
+set tag=50.0.2661.75
 set depot=depot_tools
-set browser=chromium_browser
+set browser=Chromium
 
 rem Create root directory
 if exist %root_name% (
@@ -33,7 +33,7 @@ cd .\%browser%
 call ..\..\GetChromiumTag.bat %tag%
 
 rem Build browser
-call ..\..\BuildChromium.bat
+rem call ..\..\BuildChromium.bat
 
 pause
 goto:eof
