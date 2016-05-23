@@ -4,6 +4,7 @@ Get Chromium
 
 import sys
 import os
+import subprocess
 
 class AppError(Exception):
     def __init__(self, err):
@@ -17,13 +18,22 @@ def CheckAndCreateWorkDir(name, err_descr) :
     os.mkdir(name)
     os.chdir(name)   
 
+def BatchCommand(command) :
+    p = subprocess.run(command,  shell=True,
+                     stdin=subprocess.PIPE,
+                     stdout=subprocess.PIPE)
+    print('-'*(len(command)+ 20))
+    print("Command " + str(command) + " OUT >>> ")
+    print('-'*(len(command)+ 20))
+    p.stdout
+        
 print('GetChromium Started')
 
 # Main parameters
 root_name = 'chrome'
 tag = '47.0.2526.111'
 depot_name = 'depot_tools'
-browser= 'chromium_browser'
+sources_name= 'chromium_browser'
 
 # Root directory
 CheckAndCreateWorkDir(root_name, 'Exsist root directory!')
@@ -37,6 +47,7 @@ CheckAndCreateWorkDir(depot_name, 'Exsist depot directory!')
 
 depot_archive = os.path.join(os.getcwd(), depot_zip_name)
 
+print('  Url query depot tools')
 import urllib.request
 url_opener = urllib.request.URLopener()
 url_opener.retrieve(url_depot, depot_archive)
@@ -46,6 +57,32 @@ import zipfile
 with zipfile.ZipFile(depot_archive) as zip_archive:
     zip_archive.extractall()
 os.remove(depot_archive)
+os.environ['Path'] = str(os.getcwd()) + ';' +  os.environ['Path']
+
+os.chdir('..')
+
+# Get chromium sources
+print('  Get chromium sources')
+CheckAndCreateWorkDir(sources_name, 'Exsist chromium sources directory!')
+BatchCommand('fetch --nohooks chromium')
+
+if not os.path.isdir('./src') :
+    raise AppError('No src directory!')
+
+# Get needed tag
+print('  Get needed tag')
+os.chdir('./src')
+comnds = '''git stash
+git checkout tags/{}
+gclient sync --with_branch_heads --nohooks'''.format(tag)
+list(map(BatchCommand, comnds.splitlines(True)))
+
+os.chdir('../..')
+print('GetChromium Finished success')
+
+# End
+os.chdir('..')
+sys.exit()
 
 # Clean
 if true :
