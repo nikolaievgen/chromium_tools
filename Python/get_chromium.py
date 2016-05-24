@@ -14,80 +14,101 @@ class AppError(Exception):
     
 def CheckAndCreateWorkDir(name, err_descr) :
     if os.path.isdir(name) :
-        raise AppError('Exsist root directory!')
+        raise AppError(err_descr)
     os.mkdir(name)
     os.chdir(name)   
 
 def BatchCommand(command) :
     p = subprocess.run(command,  shell=True,
                      stdin=subprocess.PIPE,
-                     stdout=subprocess.PIPE)
-    print('-'*(len(command)+ 20))
+                     stdout=subprocess.PIPE,
+                     stderr=subprocess.STDOUT)
+    delim_str = '-'*(len(command)+ 20)
+    print(delim_str)
     print("Command " + str(command) + " OUT >>> ")
-    print('-'*(len(command)+ 20))
+    print(delim_str)
     p.stdout
-        
-print('GetChromium Started')
-
-# Main parameters
-root_name = 'chrome'
-tag = '47.0.2526.111'
-depot_name = 'depot_tools'
-sources_name= 'chromium_browser'
-
-# Root directory
-CheckAndCreateWorkDir(root_name, 'Exsist root directory!')
 
 # Get depot tools
-print('  Get Depot tools')
-url_depot = 'https://storage.googleapis.com/chrome-infra/depot_tools.zip'
-depot_zip_name = 'depot_tools.zip'
+def GetDepotTools(depot_name = 'depot_tools') :
+    print('  Get Depot tools')
+    url_depot = 'https://storage.googleapis.com/chrome-infra/depot_tools.zip'
+    depot_zip_name = 'depot_tools.zip'
 
-CheckAndCreateWorkDir(depot_name, 'Exsist depot directory!')
+    CheckAndCreateWorkDir(depot_name, 'Exsist depot directory!')
 
-depot_archive = os.path.join(os.getcwd(), depot_zip_name)
+    depot_archive = os.path.join(os.getcwd(), depot_zip_name)
 
-print('  Url query depot tools')
-import urllib.request
-url_opener = urllib.request.URLopener()
-url_opener.retrieve(url_depot, depot_archive)
+    print('  Url query depot tools')
+    import urllib.request
+    url_opener = urllib.request.URLopener()
+    url_opener.retrieve(url_depot, depot_archive)
 
-print('  Extracting Depot tools')
-import zipfile
-with zipfile.ZipFile(depot_archive) as zip_archive:
-    zip_archive.extractall()
-os.remove(depot_archive)
-os.environ['Path'] = str(os.getcwd()) + ';' +  os.environ['Path']
-
-os.chdir('..')
+    print('  Extracting Depot tools')
+    import zipfile
+    with zipfile.ZipFile(depot_archive) as zip_archive:
+        zip_archive.extractall()
+    os.remove(depot_archive)
+    # add dir to PATH
+    os.environ['Path'] = str(os.getcwd()) + ';' +  os.environ['Path']
+    # return to original
+    os.chdir('..')
 
 # Get chromium sources
-print('  Get chromium sources')
-CheckAndCreateWorkDir(sources_name, 'Exsist chromium sources directory!')
-BatchCommand('fetch --nohooks chromium')
-
-if not os.path.isdir('./src') :
-    raise AppError('No src directory!')
-
+def GetChromiumSources(chromium_sources_name = 'chromium_browser') :
+    print('  Get chromium sources')
+    CheckAndCreateWorkDir(chromium_sources_name, 'Exsist chromium sources directory!')
+    BatchCommand('fetch --nohooks chromium')
+    
+    # return to original
+    os.chdir('..')
+    
 # Get needed tag
-print('  Get needed tag')
-os.chdir('./src')
-comnds = '''git stash
-git checkout tags/{}
-gclient sync --with_branch_heads --nohooks'''.format(tag)
-list(map(BatchCommand, comnds.splitlines(True)))
+def GetChromiumTag(tag) :
+    print('  Get needed tag')
 
-os.chdir('../..')
-print('GetChromium Finished success')
+    # we must be in chromium sources directory
+    if not os.path.isdir('./src') :
+        raise AppError('No src directory!')
+    
+    os.chdir('./src')
+    comnds = '''git fetch origin
+    git stash
+    git checkout tags/{}
+    gclient sync --with_branch_heads --nohooks'''.format(tag)
+    list(map(BatchCommand, comnds.splitlines(True)))
+    # return to original
+    os.chdir('..')
+    
+def GetChromium(tag='47.0.2526.111') :      
+    print('GetChromium Started')
 
-# End
-os.chdir('..')
-sys.exit()
+    # Main parameters
+    root_name = 'chrome'
+    chromium_sources_name = 'chromium_browser'
+    
+    # Root directory
+    CheckAndCreateWorkDir(root_name, 'Exsist root directory!')
 
-# Clean
-if true :
-    import shutil
+    GetDepotTools()
+    GetChromiumSources(chromium_sources_name)
+    os.chdir(chromium_sources_name)
+    GetChromiumTag(tag)
+
+    # return to original
     os.chdir('../..')
-    shutil.rmtree(os.path.abspath(os.path.join(os.getcwd(), root_name)))
-                              
+        
+    print('GetChromium Finished success')
+
+    '''
+    # Clean
+    if true :
+        import shutil
+        os.chdir('../..')
+        shutil.rmtree(os.path.abspath(os.path.join(os.getcwd(), root_name)))
+    '''
+
+if __name__ == '__main__' :
+    GetChromium()
+                            
               
