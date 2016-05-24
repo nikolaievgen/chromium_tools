@@ -27,7 +27,7 @@ def BatchCommand(command) :
     print(delim_str)
     print("Command " + str(command) + " OUT >>> ")
     print(delim_str)
-    p.stdout
+    print(p.stdout.decode('cp866'))
 
 # Get depot tools
 def GetDepotTools(depot_name = 'depot_tools') :
