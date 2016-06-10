@@ -11,48 +11,59 @@ import helpers
 
 # Parameters
 tag_name = '47.0.2526.111'
-new_directory_dev_sources_name = 'dev_sources'
+working_directory = r'F:\Projects\Amigo\Chromium'
+dev_sources_directory_name = 'dev_sources'
+dev_branch_name = 'chromium_beta'
+dev_sources_name = 'amigo_browser_38'
 
 def MergeChromiumTagAndDevelopmentSources() :
+    os.chdir(working_directory)
+
     base_dir = os.getcwd()
 
+    # Get Chromium tag
     chromium.GetChromium(tag_name)
 
+    # Clean Chromium sources
     os.chdir(chromium.chromium_sources)
     dev_sources.CleanChromiumSources()
     os.chdir(base_dir)
     
-    helpers.CheckNotExistDir(new_directory_dev_sources_name, 'Exsist development sources directory!')
-    dev_sources.CloneDevSources(branch_name)
+    # Get Dev sources
+    helpers.CheckNotExistDir(dev_sources_name, 'Exsist development sources directory!')
+    dev_sources.CloneDevSources(dev_branch_name)
     
-    helpers.CheckExistDir(new_directory_dev_sources_name, 'Development sources directory NOT exists!')
-    helpers.RemoveAllExcept(new_directory_dev_sources_name, ['.git'])
+    # Old Size 
+    was_dev_size = helpers.GetSizeFolder(dev_branch_name)
+
+    # Prepare for merge (Remove all except .git) 
+    helpers.CheckExistDir(dev_sources_name, 'Development sources directory NOT exists!')
+    helpers.RemoveAllExcept(dev_sources_name, ['.git'])
     
-    pass
+    # Copy chromium sources
+    helpers.BatchCommand(r'xcopy .\{}\* {} /S /Q'.
+        format(dev_sources_name, os.path.join(base_dir, chromium.chromium_sources)))
 
-'''
-0. get chromium
-0. create chromium clean
-1. git clone -b my-branch git@github.com:user/myproject.git
-2. calculate all size1
-2. remove in dir all except .git
-3. copy all from chromium clean
-xcopy .\* f:\Projects\Amigo\Chromium1\Amigo\amigo_browser_38 /S /Q
+    # New Size 
+    new_dev_size = helpers.GetSizeFolder(dev_branch_name)
 
-4. rename .git ignore as git ignore new
-5. git add --all 
-6. git add -u
-6. calculate all size2
-7. compare size1 and size2 need commit?
-7. parse git diff
-7. git commit -m "[major] Chromium beta 38.0.2125.77"
-8. rename as .git ignore
-9. git commit -m "[major] Chromium beta 38.0.2125.77"
+    # Print diff size of sources
+    if was_dev_size != new_dev_size :
+        print('*'*30)
+        print('!!! Warning !!! was {} MB new {} MB', was_dev_size, new_dev_size)
+        print('*'*30)
 
-'''  
-
+    # Prepare and commit
+    os.chdir(dev_sources_name)
+    os.rename(r'.\src\.gitignore', r'.\src\.gitignore_new')
+    helpers.BatchCommand(r'git add --all')
+    helpers.BatchCommand(r'git add -u')
+    helpers.BatchCommand(r'git commit -m "Chromium beta {}" all commit'.format(tag_name))
+    os.rename(r'.\src\.gitignore_new', r'.\src\.gitignore')
+    helpers.BatchCommand(r'git commit -m "Chromium beta {}"'.format(tag_name))
+    os.chdir(base_dir)
 
 if __name__ == '__main__' :
-    GetChromium()
+    MergeChromiumTagAndDevelopmentSources()
                             
               
