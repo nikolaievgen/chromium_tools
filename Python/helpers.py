@@ -85,3 +85,11 @@ def RemoveAllExcept(where, except_list) :
         if item not in except_list :
             item = os.path.join(where, item)
             RemoveDirectory(item)
+
+def GetSizeFolder(start_path):
+    total_size = 0
+    for dirpath, dirnames, filenames in os.walk(start_path):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            total_size += os.path.getsize(fp)
+    return total_size
