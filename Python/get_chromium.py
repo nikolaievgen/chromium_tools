@@ -8,23 +8,18 @@ import os
 import chromium
 import dev_sources
 import helpers
-
-# Parameters
-tag_name = '50.0.2661.102'
-working_directory = r'F:\Projects\Amigo\Chromium'
-dev_sources_directory_name = 'dev_sources'
-dev_branch_name = 'chromium_beta'
-dev_sources_name = 'amigo_browser_38'
+import config_params    
 
 def MergeChromiumTagAndDevelopmentSources() :
-    os.chdir(working_directory)
+    os.chdir(config_params.working_directory)
 
     base_dir = os.getcwd()
 
     # Get Chromium tag
-    chromium.GetChromium(tag_name)
+    chromium.GetChromium(config_params.tag_name)
 
-    exit()
+    # first stage
+    #exit()
 
     # Clean Chromium sources
     os.chdir(chromium.chromium_sources)
@@ -32,22 +27,23 @@ def MergeChromiumTagAndDevelopmentSources() :
     os.chdir(base_dir)
     
     # Get Dev sources
-    helpers.CheckNotExistDir(dev_sources_name, 'Exsist development sources directory!')
-    dev_sources.CloneDevSources(dev_branch_name)
+    helpers.CheckNotExistDir(config_params.dev_sources_name, 'Exsist development sources directory!')
+    dev_sources.CloneDevSources(config_params.dev_branch_name)
     
+    one_mb = (1024 * 1024)
     # Old Size 
-    was_dev_size = helpers.GetSizeFolder(dev_sources_name)
+    was_dev_size = helpers.GetSizeFolder(config_params.dev_sources_name) / one_mb
 
     # Prepare for merge (Remove all except .git) 
-    helpers.CheckExistDir(dev_sources_name, 'Development sources directory NOT exists!')
-    helpers.RemoveAllExcept(dev_sources_name, ['.git'])
+    helpers.CheckExistDir(config_params.dev_sources_name, 'Development sources directory NOT exists!')
+    helpers.RemoveAllExcept(config_params.dev_sources_name, ['.git'])
     
     # Copy chromium sources
     helpers.BatchCommand(r'xcopy {}\* {} /E /Q /Y /H'.
-        format(os.path.join(base_dir, chromium.chromium_sources), dev_sources_name))
+        format(os.path.join(base_dir, chromium.chromium_sources), config_params.dev_sources_name))
 
     # New Size 
-    new_dev_size = helpers.GetSizeFolder(dev_sources_name)
+    new_dev_size = helpers.GetSizeFolder(config_params.dev_sources_name) / one_mb
 
     # Print diff size of sources
     if was_dev_size != new_dev_size :
@@ -56,14 +52,14 @@ def MergeChromiumTagAndDevelopmentSources() :
         print('*'*30)
 
     # Prepare and commit
-    os.chdir(dev_sources_name)
+    os.chdir(config_params.dev_sources_name)
     os.rename(r'.\src\.gitignore', r'.\src\.gitignore_new')
     helpers.BatchCommand(r'git add --all')
     helpers.BatchCommand(r'git add -u')
-    helpers.BatchCommand(r'git commit -m "Chromium beta {} all commit"'.format(tag_name))
+    helpers.BatchCommand(r'git commit -m "Chromium beta {} all commit"'.format(config_params.tag_name))
     os.rename(r'.\src\.gitignore_new', r'.\src\.gitignore')
     helpers.BatchCommand(r'git add .\src\.gitignore')
-    helpers.BatchCommand(r'git commit -m "Chromium beta {}"'.format(tag_name))
+    helpers.BatchCommand(r'git commit -m "Chromium beta {}"'.format(config_params.tag_name))
     os.chdir(base_dir)
 
 if __name__ == '__main__' :
