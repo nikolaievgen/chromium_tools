@@ -5,6 +5,7 @@
 import sys
 import os
 import subprocess
+import shutil
 
 class AppError(Exception):
     def __init__(self, err):
@@ -16,8 +17,8 @@ def CheckNotExistDir(name, err_descr) :
     if os.path.isdir(name) :
         raise AppError(err_descr)
 
-def CheckNotExistDir(name, err_descr) :
-    if os.path.isdir(name) :
+def CheckExistDir(name, err_descr) :
+    if not os.path.isdir(name) :
         raise AppError(err_descr)
 
 def CheckIsEmptyDir(name, err_descr) :
@@ -73,18 +74,29 @@ def RemoveDirectory(one) :
         else:
             raise
     
-    if os.path.isdir(one) :
-        shutil.rmtree(one, onerror=onerror)
-        print('    Remove done!')
-    else :
-        print('    No directory!')
+    try :
+        if os.path.isdir(one) :
+            shutil.rmtree(one, onerror=onerror)
+            print('    Remove done!')
+        else :
+            print('    No directory!')
+    except Exception as inst :
+        print('Remove directory exception!')
+        print(inst)
+        print('Force deleting!')
+        # force deleting
+        BatchCommand(r'rmdir /S /Q {}'.format(one))
+        CheckNotExistDir(one, 'Error directory removing!')
 
 def RemoveAllExcept(where, except_list) :
     dir_list = os.listdir(where)
     for item in dir_list :
         if item not in except_list :
             item = os.path.join(where, item)
-            RemoveDirectory(item)
+            if os.path.isfile(item) :
+                os.remove(item)
+            else :
+                RemoveDirectory(item)
 
 def GetSizeFolder(start_path):
     total_size = 0
