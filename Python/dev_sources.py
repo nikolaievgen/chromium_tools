@@ -9,22 +9,11 @@ import time
 
 from helpers import (AppError, BatchCommand, CheckAndCreateDir, RemoveDirectory, SystemOutput)
 
-def CreateDevSources(new_directory_dev_sources_name, branch_name) :
-    print("Create development sources")
-
-    CheckAndCreateDir(new_directory_dev_sources_name, 'Exsist development sources directory!')
-    
-    CloneDevSources(branch_name)
-
-    os.chdir('..')
-
-    print("Create development sources done!")
-
-def CloneDevSources(branch_name) :
+def CloneDevSources(branch_name, repository_url) :
     print("Clone development sources")
 
     BatchCommand(
-          "git clone -b {} git@gitlab.corp.mail.ru:amigo/amigo_browser_38.git".format(branch_name)
+          "git clone -b {} {}".format(branch_name, repository_url)
           )
     
     print("Clone development sources done!")

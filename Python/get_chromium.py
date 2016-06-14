@@ -28,7 +28,7 @@ def MergeChromiumTagAndDevelopmentSources() :
     
     # Get Dev sources
     helpers.CheckNotExistDir(config_params.dev_sources_name, 'Exsist development sources directory!')
-    dev_sources.CloneDevSources(config_params.dev_branch_name)
+    dev_sources.CloneDevSources(config_params.dev_branch_name, config_params.dev_repository_url)
     
     one_mb = (1024 * 1024)
     # Old Size 
