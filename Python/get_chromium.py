@@ -11,6 +11,10 @@ import helpers
 import config_params    
 
 def MergeChromiumTagAndDevelopmentSources() :
+    # Tag can set as param
+    if len(sys.argv) == 2 :
+        config_params.tag_name = sys.argv[1]
+    
     os.chdir(config_params.working_directory)
 
     base_dir = os.getcwd()
@@ -60,6 +64,8 @@ def MergeChromiumTagAndDevelopmentSources() :
     os.rename(r'.\src\.gitignore_new', r'.\src\.gitignore')
     helpers.BatchCommand(r'git add .\src\.gitignore')
     helpers.BatchCommand(r'git commit -m "Chromium beta {}"'.format(config_params.tag_name))
+    #helpers.BatchCommand(r'git push origin')
+
     os.chdir(base_dir)
 
 if __name__ == '__main__' :
