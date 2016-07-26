@@ -33,8 +33,8 @@ def GetWorkingDirectory() :
         for name in names :
             path_name =  os.path.join(config_params.root_working_directory, name)
             stat = os.stat(path_name)
-            creations.append(stat.ctime)
-            path_names[stat.ctime] = path_name
+            creations.append(stat.st_ctime)
+            path_names[stat.st_ctime] = path_name
 
         # remove oldest
         if(len(creations) > 0 and len(path_names) > 0 ) :
