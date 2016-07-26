@@ -88,6 +88,25 @@ def RemoveDirectory(one) :
         BatchCommand(r'rmdir /S /Q {}'.format(one))
         CheckNotExistDir(one, 'Error directory removing!')
 
+def CopyFile(src, dst) :
+    try :
+        shutil.copy2(src, dst)
+    except OSError as why :
+        print("Error copy file : {}, cause : !".format(src, why.strerror))
+
+def CopyCreateDirectory(src, dst) :
+    shutil.copytree(src, dst, False, None, CopyFile);
+
+def CopyDirectory(src, dst) :
+    names = os.listdir(src)
+    for name in names:
+        srcname = os.path.join(src, name)
+        dstname = os.path.join(dst, name)
+        if os.path.isdir(srcname):
+            CopyCreateDirectory(srcname, dstname)
+        else:
+            CopyFile(srcname, dstname)
+
 def RemoveAllExcept(where, except_list) :
     dir_list = os.listdir(where)
     for item in dir_list :

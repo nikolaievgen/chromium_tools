@@ -4,12 +4,12 @@
 
 import sys
 import os
+import argparse
 
 import chromium
 import dev_sources
 import helpers
 import config_params    
-import argparse
 
 def MergeChromiumTagAndDevelopmentSources() :
     # process arguments
@@ -53,8 +53,9 @@ def MergeChromiumTagAndDevelopmentSources() :
     helpers.RemoveAllExcept(config_params.dev_sources_name, ['.git'])
     
     # Copy chromium sources
-    helpers.BatchCommand(r'xcopy {}\* {} /E /Q /Y /H'.
-        format(os.path.join(base_dir, chromium.chromium_sources), config_params.dev_sources_name))
+    # helpers.BatchCommand(r'xcopy {}\* {} /E /Q /Y /H'.
+    #    format(os.path.join(base_dir, chromium.chromium_sources), config_params.dev_sources_name))
+    helpers.CopyDirectory(os.path.join(base_dir, chromium.chromium_sources), config_params.dev_sources_name)
 
     # New Size 
     new_dev_size = helpers.GetSizeFolder(config_params.dev_sources_name) / one_mb
@@ -80,6 +81,7 @@ def MergeChromiumTagAndDevelopmentSources() :
 
 if __name__ == '__main__' :
     MergeChromiumTagAndDevelopmentSources()
+
     input("Press enter to exit ;)")
                             
               
