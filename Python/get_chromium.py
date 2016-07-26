@@ -11,19 +11,7 @@ import dev_sources
 import helpers
 import config_params    
 
-def MergeChromiumTagAndDevelopmentSources() :
-    # process arguments
-    parser = argparse.ArgumentParser("Merging chromium tag")
-    parser.add_argument('--tag')
-    parser.add_argument('--dir')
-    args = vars(parser.parse_args(sys.argv[1:]))
-
-    if 'tag' in args :
-        config_params.tag_name = args['tag']
-
-    if 'dir' in args:
-        config_params.working_directory = args['dir']
-    
+def MergeChromium() :
     # set working directory
     os.chdir(config_params.working_directory)
 
@@ -80,8 +68,18 @@ def MergeChromiumTagAndDevelopmentSources() :
     os.chdir(base_dir)
 
 if __name__ == '__main__' :
-    MergeChromiumTagAndDevelopmentSources()
+    # process arguments
+    parser = argparse.ArgumentParser("Merging chromium tag")
+    parser.add_argument('--tag')
+    parser.add_argument('--dir')
+    args = vars(parser.parse_args(sys.argv[1:]))
+
+    if 'tag' in args :
+        config_params.tag_name = args['tag']
+
+    if 'dir' in args:
+        config_params.working_directory = args['dir']
+
+    MergeChromium()
 
     input("Press enter to exit ;)")
-                            
-              

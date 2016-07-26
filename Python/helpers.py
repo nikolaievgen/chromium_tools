@@ -124,3 +124,12 @@ def GetSizeFolder(start_path):
             fp = os.path.join(dirpath, f)
             total_size += os.path.getsize(fp)
     return total_size
+
+class PrintLogger:
+    def __init__(self, filename):
+        self.terminal = sys.stdout
+        self.log = open(filename, "w")
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
