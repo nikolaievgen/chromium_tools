@@ -54,7 +54,7 @@ def CheckNeedMerge() :
         tag = ''
         with open(config_params.new_beta_file) as f :
             tag = f.readline().strip()
-        #os.remove(config_params.new_beta_file)
+        os.remove(config_params.new_beta_file)
 
         if tag :
             RunMergeChromium(tag)
