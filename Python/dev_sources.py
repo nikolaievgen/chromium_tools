@@ -7,50 +7,41 @@ import subprocess
 import shutil
 import time
 
-from helpers import (AppError, BatchCommand, CheckAndCreateDir, RemoveDirectory, SystemOutput)
+from helpers import (AppError, BatchCommand, CheckAndCreateDir, RemoveDirectory)
 
+# clone development sources
 def CloneDevSources(branch_name, repository_url) :
-    print("Clone development sources")
+  print("Clone development sources")
 
-    BatchCommand(
-          "git clone -b {} {}".format(branch_name, repository_url)
-          )
+  BatchCommand("git clone -b {} {}".format(branch_name, repository_url))
     
-    print("Clone development sources done!")
+  print("Clone development sources done!")
                    
+# clean chromium sources, delete unused massive tests, etc 
 def CleanChromiumSources() :
-    print('CleanChromiumSources sources start')
+  print('CleanChromiumSources sources start')
     
-    if not os.path.isdir('src') :
-        raise AppError('No src directory!')
-    curr_dir = os.getcwd();
+  if not os.path.isdir('src') :
+    raise AppError('No src directory!')
+  curr_dir = os.getcwd();
 
-    garbages = [
+  garbages = [
     r'src\chrome\tools\test\reference_build',
     r'src\third_party\hunspell_dictionaries',
     r'src\third_party\WebKit\LayoutTests',
     r'src\third_party\WebKit\ManualTests',
     r'src\third_party\WebKit\PerformanceTests'
-    ]
+  ]
 
-    for one in garbages :
-        one = os.path.abspath(os.path.join(curr_dir, one))
-        RemoveDirectory(one)
+  for one in garbages :
+    one = os.path.abspath(os.path.join(curr_dir, one))
+    RemoveDirectory(one)
 
-    garbages_git = BatchCommand("dir /b/s/A .git").splitlines()
+  garbages_git = BatchCommand("dir /b/s/A .git").splitlines()
 
-    for one in garbages_git :
-        RemoveDirectory(one)
+  for one in garbages_git :
+    RemoveDirectory(one)
 
-    print('Remove git garbages done!')
+  print('Remove git garbages done!')
     
-    print('CleanChromiumSources sources Finished success')
-   
-if __name__ == '__main__' :
-    os.chdir(r'f:\Projects\Amigo')
-    os.chdir('Chromium1')
-
-    '''
-    PrepareSources()
-    '''
-
+  print('CleanChromiumSources sources Finished success')
