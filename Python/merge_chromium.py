@@ -66,7 +66,7 @@ def MergeChromium() :
   os.rename(r'.\src\.gitignore_new', r'.\src\.gitignore')
   helpers.BatchCommand(r'git add .\src\.gitignore')
   helpers.BatchCommand(r'git commit -m "Chromium beta {}"'.format(config_params.tag_name))
-  #helpers.BatchCommand(r'git push origin')
+  helpers.BatchCommand(r'git push origin {}'.format(config_params.dev_branch_name))
 
   os.chdir(base_dir)
 
